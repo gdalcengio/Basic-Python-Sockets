@@ -9,10 +9,33 @@ serversocket.listen(1)
 print('The server is ready to receive')
 
 while(1) :
+    #accept client connection
     connectionSocket, addr = serversocket.accept()
 
-    rd = connectionSocket.recv(1024).decode()
-    capSentence = rd.upper()
-    connectionSocket.send(capSentence.encode())
+    #get request from client
+    request = connectionSocket.recv(1024).decode()
 
+    #parse and split since the [1] is / for ~ "GET /... HTTP/1.1"
+    headers = request.split('\n')
+    filename = headers[0].split()[1]
+    filename = filename[1:] #substring acount for leading / 
+    
+    #print for testing and verification on our end
+    print(headers)
+    print(filename)
+
+    #create HTTP response
+    data = "HTTP/1.1 200 OK\r\n"
+    data += "Content-Type: text/html; charset=utf-8\r\n"
+    data += "\r\n"
+
+    #open contents of filename requested
+    f = open(filename, "r")
+    contents = f.read()
+    data += contents
+
+    #send header + contents
+    connectionSocket.sendall(data.encode())
+
+    #close sockets
     connectionSocket.close()

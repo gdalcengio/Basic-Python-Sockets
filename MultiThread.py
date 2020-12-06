@@ -4,17 +4,11 @@ import threading
   
 #print_lock = threading.Lock()
 
-class BadReq(Exception):
-   pass
-
 def threaded(connectionSocket): 
 
     try:
         message = connectionSocket.recv(2500)
         filename = message.split()[1]
-        if not ('html').encode('utf-8') in filename:
-#            print_lock.release()
-            raise BadReq
         f = open(filename[1:])
         outputdata = f.read()
         connectionSocket.send(('HTTP/1.1 200 OK\nContent-Type: text/html\n\n').encode('utf-8'))
@@ -29,7 +23,7 @@ def threaded(connectionSocket):
         connectionSocket.send(('HTTP/1.1 404 File not found\nContent-Type: text/html\n\n').encode('utf-8'))
 #        print_lock.release()
         connectionSocket.close()
-    except BadReq:
+    except connectionSocket.error:
         connectionSocket.send(('HTTP/1.1 400 Bad Request\nContent-Type: text/html\n\n').encode('utf-8'))
 #        print_lock.release()
         connectionSocket.close()

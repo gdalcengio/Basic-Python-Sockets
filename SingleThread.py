@@ -1,8 +1,5 @@
 from socket import *
 
-class BadReq(Exception):
-   pass
-
 def createServer():
     serversocket = socket(AF_INET, SOCK_STREAM)
     serversocket.bind(('localhost',9000))
@@ -16,8 +13,6 @@ def createServer():
         try:
             message = connectionSocket.recv(2500)
             filename = message.split()[1]
-            if not ('html').encode('utf-8') in filename:
-                raise BadReq
             f = open(filename[1:])
             outputdata = f.read()
             connectionSocket.send(('HTTP/1.1 200 OK\nContent-Type: text/html\n\n').encode('utf-8'))
@@ -30,7 +25,7 @@ def createServer():
         except (FileNotFoundError, IOError):
             connectionSocket.send(('HTTP/1.1 404 File not found').encode('utf-8'))
             connectionSocket.close()
-        except BadReq:
+        except connectionSocket.error:
             connectionSocket.send(('HTTP/1.1 400 Bad Request').encode('utf-8'))
             connectionSocket.close()
         except connectionSocket.timeout:
